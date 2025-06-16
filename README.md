@@ -1,1 +1,1 @@
-This is my assignment for the first week. This is my first experience with python so it seemed a little exhausting but am satisfied of learning. Sometimes has to use AI especially in Problem 5 but well understood the answer.
+This is my assignment for the first week. This was my first experience with python so it seemed a little exhausting but am satisfied of learning. Sometimes has to use AI especially in Problem 5 but well understood the answer.
