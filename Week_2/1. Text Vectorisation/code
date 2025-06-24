@@ -1,1 +1,97 @@
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+import numpy as np
+import math
 
+
+# Method 1:- Manual TF- IDF
+print("Method 1:- Manual TF- IDF")
+print()
+from collections import Counter
+
+corpus = [
+    'the sun is a star',
+    'the moon is a satellite',
+    'the sun and moon are celestial bodies'
+]
+
+tokenized_docs = [doc.lower().split() for doc in corpus]
+
+def compute_tf(doc):
+    tf = {}
+    term_counts = Counter(doc)
+    total_terms = len(doc)
+    for term, count in term_counts.items():
+        tf[term] = count / total_terms
+    return tf
+
+tf_scores = [compute_tf(doc) for doc in tokenized_docs]
+
+def compute_idf(all_docs):
+    idf = {}
+    N = len(all_docs)
+    all_terms = set(term for doc in all_docs for term in doc)
+    
+    for term in all_terms:
+        doc_count = sum(1 for doc in all_docs if term in doc)
+        idf[term] = math.log(N / (doc_count))  
+    return idf
+
+idf_scores = compute_idf(tokenized_docs)
+
+def compute_tfidf(tf, idf):
+    tfidf = {}
+    for term, tf_val in tf.items():
+        tfidf[term] = tf_val * idf.get(term, 0.0)
+    return tfidf
+
+tfidf_docs = [compute_tfidf(tf, idf_scores) for tf in tf_scores]
+for i, tfidf in enumerate(tfidf_docs):
+    print(f"\ncorpus {i+1} TF-IDF:")
+    for term, score in sorted(tfidf.items(), key=lambda x: -x[1]):
+        print(f"{term}: {score:.4f}")
+
+
+
+
+# Method 2:- CountVectorizer
+
+print()
+print("Method 2:- CountVectorizer")
+print()
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(corpus)  
+term_freq_matrix = X.toarray()
+terms = vectorizer.get_feature_names_out()
+
+
+N = len(corpus)
+df = np.count_nonzero(term_freq_matrix > 0, axis=0)  
+idf = np.log(N / (df))  
+
+tfidf_matrix = term_freq_matrix * idf  
+
+for doc_index, tfidf_vector in enumerate(tfidf_matrix):
+    print(f"\nCorpus {doc_index + 1} TF-IDF:")
+    for term_index, score in sorted(enumerate(tfidf_vector), key=lambda x: -x[1]):
+        if term_freq_matrix[doc_index, term_index] > 0:
+            print(f"{terms[term_index]}: {score:.4f}")
+
+
+
+
+# Method- 3 TfidfVectorizer
+
+print()
+print("Method- 3 TfidfVectorizer")
+print()
+vectorizer = TfidfVectorizer()
+tfidf_matrix = vectorizer.fit_transform(corpus)
+terms = vectorizer.get_feature_names_out()
+tfidf_array = tfidf_matrix.toarray()
+
+for doc_index, tfidf_vector in enumerate(tfidf_array):
+    print(f"\nCorpus {doc_index + 1} TF-IDF:")
+    for term_index, score in sorted(enumerate(tfidf_vector), key=lambda x: -x[1]):
+        if score > 0:
+            print(f"{terms[term_index]}: {score:.4f}")
